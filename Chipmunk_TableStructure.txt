@@ -1,0 +1,76 @@
+---------------------------FACT TABLE-----------------------
+
+-----directly dump the file in to this table -------------
+
+CREATE TABLE Transactions_Raw (
+TransactionTimeStamp TIMESTAMP,
+CardId BIGINT, 
+DateId BIGINT,
+StoreId BIGINT,
+CountryCode STRING,
+POSTransactionNumber BIGINT, 
+Quantity BIGINT,
+NetAmount DOUBLE,
+TaxAmount DOUBLE,
+PointsEarned BIGINT,
+Year INT,
+Month INT,
+SKUId BIGINT)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'	
+STORED AS TEXTFILE;
+
+
+---Load the partion table from raw table -------------------
+
+CREATE TABLE Transactions (
+TransactionTimeStamp TIMESTAMP,
+CardId BIGINT, 
+DateId BIGINT,
+StoreId BIGINT,
+CountryCode STRING,
+POSTransactionNumber BIGINT, 
+Quantity BIGINT,
+NetAmount DOUBLE,
+TaxAmount DOUBLE,
+PointsEarned BIGINT)
+PARTITIONED BY (SKUId BIGINT,Year INT,Month INT) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+STORED AS TEXTFILE;
+
+
+-------------Load in Avro format from txt file format table---------------
+
+ CREATE TABLE Transactions_Avro
+ PARTITIONED BY (SKUId BIGINT,Year INT,Month INT) 
+ ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+ STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+ OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+TBLPROPERTIES ('avro.schema.literal'='{
+"name": "TransactionRecord",
+"type": "record",
+"fields": [
+{"name":"TimeStamp", "type":"string"},
+{"name":"CardId", "type":"long"},
+{"name":"DateId", "type":"long"},
+{"name":"CountryCode", "type":"string"},
+{"name":"StoreId", "type":"long"},
+{"name":"POSTransactionNumber", "type":"long"},
+{"name": "Quantity", "type":"double"},
+{"name": "PointsEarned", "type":"long"},
+{"name": "NetAmount", "type":"double"},
+{"name": "TaxAmount", "type":"double"}]}'); 
+
+
+
+---------------------------------------DIMENSIONS TABLES----------------------------------------------------------------
+
+
+CREATE TABLE Cards(CardId Bigint, CardNumber Bigint,IssuedOn string,ExpiredOn string, FirstName string, LastName string ,Address struct<ZipCode:string,State:string,Country:string>)
+
+CREATE TABLE Dates(DateId Bigint, DateInfo struct<Year: Int,Quarter: Int,Month: Int,DayOfWeek: Int,DayOfMonth: Int>)
+
+CREATE TABLE Stores(StoreId Bigint,StoreName string,StoreAddress struct<ZipCode:string,State:string,Country:string>)
+
+CREATE TABLE SKU(SKuId Bigint,SKUName string,ProductCategory string)	
