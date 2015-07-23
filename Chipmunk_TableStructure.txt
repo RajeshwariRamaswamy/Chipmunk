@@ -64,13 +64,27 @@ TBLPROPERTIES ('avro.schema.literal'='{
 
 
 
----------------------------------------DIMENSIONS TABLES----------------------------------------------------------------
-
+---------------------------------------DIMENSIONS TABLES---------------------------------------------------------------
 
 CREATE TABLE Cards(CardId Bigint, CardNumber Bigint,IssuedOn string,ExpiredOn string, FirstName string, LastName string ,Address struct<ZipCode:string,State:string,Country:string>)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+COLLECTIONITEMS ITEMS TERMINATED BY '$';
+STORED AS TEXTFILE;
 
-CREATE TABLE Dates(DateId Bigint, DateInfo struct<Year: Int,Quarter: Int,Month: Int,DayOfWeek: Int,DayOfMonth: Int>)
+CREATE TABLE Dates(DateId Bigint, DateInfo struct<Year: Int,Quarter: Int,Month: Int,DayOfWeek: Int,DayOfMonth: Int>)ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+COLLECTIONITEMS ITEMS TERMINATED BY '$';
+STORED AS TEXTFILE;
 
 CREATE TABLE Stores(StoreId Bigint,StoreName string,StoreAddress struct<ZipCode:string,State:string,Country:string>)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+COLLECTIONITEMS ITEMS TERMINATED BY '$';
+STORED AS TEXTFILE;
 
-CREATE TABLE SKU(SKuId Bigint,SKUName string,ProductCategory string)	
+CREATE TABLE SKU(SKuId Bigint,SKUName string,ProductCategory string)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+STORED AS TEXTFILE;
+	
