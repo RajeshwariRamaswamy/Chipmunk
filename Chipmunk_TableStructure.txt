@@ -66,18 +66,18 @@ TBLPROPERTIES ('avro.schema.literal'='{
 
 ---------------------------------------DIMENSIONS TABLES---------------------------------------------------------------
 
-CREATE TABLE Cards1(CardId Bigint, CardNumber Bigint,IssuedOn string,ExpiredOn string, FirstName string, LastName string ,Address struct<Addr:string,State:string,Country:string,ZipCode:string>)
+CREATE TABLE Cards(CardId string, CardNumber string,IssuedOn string,ExpiredOn string, FirstName string, LastName string ,Address struct<Addr:string,State:string,Country:string,ZipCode:string>)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 COLLECTION  ITEMS TERMINATED BY '$'
 STORED AS TEXTFILE;
 
-CREATE TABLE Dates(DateId Bigint, DateInfo struct<Year: Int,Quarter: Int,Month: Int,DayOfWeek: Int,DayOfMonth: Int>)ROW FORMAT DELIMITED
+CREATE TABLE Dates(DateId string, DateInfo struct<Year: Int,Quarter: Int,Month: Int,DayOfWeek: Int,DayOfMonth: Int>)ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 COLLECTION  ITEMS TERMINATED BY '$';
 STORED AS TEXTFILE;
 
-CREATE TABLE Stores(StoreId Bigint,StoreName string,StoreAddress struct<Address:string,State:string,Country:string,ZipCode:string>)
+CREATE TABLE Stores(StoreId string,StoreName string,StoreAddress struct<Address:string,State:string,Country:string,ZipCode:string>)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 COLLECTION  ITEMS TERMINATED BY '$';
