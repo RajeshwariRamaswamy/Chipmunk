@@ -42,7 +42,28 @@ STORED AS TEXTFILE;
 
 -------------Load in Avro format from txt file format table---------------
 
- CREATE TABLE Transactions_Avro
+
+CREATE TABLE Transactions_Avro
+ PARTITIONED BY (SKUId BIGINT,Year INT,Month INT) 
+stored as avro
+TBLPROPERTIES ('avro.schema.literal'='{
+"name": "TransactionRecord",
+"type": "record",
+"fields": [
+{"name":"TimeStamp", "type":"string"},
+{"name":"CardId", "type":"string"},
+{"name":"DateId", "type":"string"},
+{"name":"CountryCode", "type":"string"},
+{"name":"StoreId", "type":"string"},
+{"name":"POSTransactionNumber", "type":"long"},
+{"name": "Quantity", "type":"long"},
+{"name": "PointsEarned", "type":"long"},
+{"name": "NetAmount", "type":"double"},
+{"name": "TaxAmount", "type":"double"}]}');
+----------------------------------------------------------------------------------------
+
+
+ CREATE TABLE Transactions_Avro1
  PARTITIONED BY (SKUId BIGINT,Year INT,Month INT) 
  ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
  STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
@@ -52,13 +73,33 @@ TBLPROPERTIES ('avro.schema.literal'='{
 "type": "record",
 "fields": [
 {"name":"TimeStamp", "type":"string"},
-{"name":"CardId", "type":"long"},
-{"name":"DateId", "type":"long"},
+{"name":"CardId", "type":"string"},
+{"name":"DateId", "type":"string"},
 {"name":"CountryCode", "type":"string"},
-{"name":"StoreId", "type":"long"},
+{"name":"StoreId", "type":"string"},
 {"name":"POSTransactionNumber", "type":"long"},
-{"name": "Quantity", "type":"double"},
+{"name": "Quantity", "type":"long"},
 {"name": "PointsEarned", "type":"long"},
+{"name": "NetAmount", "type":"double"},
+{"name": "TaxAmount", "type":"double"}]}'); 
+
+ CREATE TABLE Transactions_Avro2
+ PARTITIONED BY (SKUId BIGINT,Year INT,Month INT) 
+ ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+ STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+ OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+TBLPROPERTIES ('avro.schema.literal'='{
+"name": "TransactionRecord",
+"type": "record",
+"fields": [
+{"name":"TimeStamp", "type":"string"},
+{"name":"CardId", "type":"string"},
+{"name":"DateId", "type":"string"},
+{"name":"CountryCode", "type":"string"},
+{"name":"StoreId", "type": ["null", "string"], "default": null},
+{"name":"POSTransactionNumber", "type": ["null", "string"], "default": null},
+{"name": "Quantity", "type":"long"},
+{"name": "PointsEarned", "type": ["null", "long"], "default": null},
 {"name": "NetAmount", "type":"double"},
 {"name": "TaxAmount", "type":"double"}]}'); 
 
@@ -83,9 +124,20 @@ FIELDS TERMINATED BY '|'
 COLLECTION  ITEMS TERMINATED BY '$';
 STORED AS TEXTFILE;
 
-CREATE TABLE SKU(SKuId Bigint,SKUName string,ProductCategory string)
+CREATE TABLE SKU(SKuId string,SKUName string,ProductCategory string)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 STORED AS TEXTFILE;
 	
-	
+load data  inpath '/usr/local/Hive/Data/TransactionData.txt' into table transactions_raw;
+
+INSERT OVERWRITE TABLE transactions PARTITION (SKUId,Year,Month) select * from transactions_raw;
+
+INSERT OVERWRITE TABLE transactions_avro PARTITION (SKUId,Year,Month) select * from transactions where cardid is not null;
+INSERT OVERWRITE TABLE transactions_avro1 PARTITION (SKUId,Year,Month) select * from transactions where cardid is not null;
+load data  inpath '/usr/local/Hive/Data/CardDetail.csv' into table Cards;
+load data  inpath '/usr/local/Hive/Data/Date.csv' into table Dates;
+load data  inpath '/usr/local/Hive/Data/Store.csv' into table Stores;
+load data  inpath '/usr/local/Hive/Data/Product.csv' into table SKU;
+
+
